@@ -1,0 +1,40 @@
+image: node:16
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  untracked: true
+  paths:
+    - node_modules
+
+stages:
+  - lint
+  - build
+  - deploy
+
+eslint:
+  stage: lint
+  tags:
+    - zzz
+  script:
+    - yarn && yarn lint
+
+build:
+  stage: build
+  tags:
+    - zzz
+  environment: dev
+  script:
+    - bash ./setup_env.sh dev
+    - yarn && yarn build --stage=dev
+
+deploy:
+  stage: deploy
+  tags:
+    - zzz
+  environment: dev
+  needs: [build]
+  script:
+    - bash ./setup_env.sh dev
+    - yarn && yarn deploy --stage=dev
+  only:
+    - develop
